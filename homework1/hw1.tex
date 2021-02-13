@@ -1,0 +1,312 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[centertags]{amsmath}
+\usepackage{amsfonts,amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage[shortlabels]{enumitem}
+\usepackage{physics,bm}
+
+\usepackage{cite,graphicx,color}
+%\usepackage{fourier}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{bbm}
+
+\usepackage{tikz,pgfplots}
+
+\usepackage{mathtools}
+%\mathtoolsset{showonlyrefs} % only show no. of refered eqs
+
+\usepackage{cleveref}
+
+\textheight 8.5in
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+
+\newtheoremstyle{dotlessP}{}{}{\color{blue!50!black}}{}{\color{blue}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{question}{Question}
+
+
+
+\def\VV{\mathbb{V}}
+\def\EE{\mathbb{E}}
+\def\PP{\mathbb{P}}
+\def\RR{\mathbb{R}}
+\newcommand{\mD}{\mathcal{D}}
+\newcommand{\mF}{F}%{\mathcal{F}}
+
+\DeclareMathOperator{\sgn}{sgn}
+%\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\erfc}{erfc}
+\DeclareRobustCommand{\argmin}{\operatorname*{argmin}}
+\DeclareRobustCommand{\arginf}{\operatorname*{arginf}}
+
+\def\EE{\mathbb{E}}\def\PP{\mathbb{P}}
+\def\NN{\mathbb{N}}\def\RR{\mathbb{R}}\def\ZZ{\mathbb{Z}}
+
+
+
+\def\<{\left\langle} \def\>{\right\rangle}
+
+
+\DeclareRobustCommand{\linear}{\operatorname*{Linear}}
+\DeclareRobustCommand{\loss}{\operatorname*{Loss}}
+\DeclareRobustCommand{\diag}{\operatorname*{diag}}
+
+\newcommand{\dldy}{\frac{\partial l}{\partial \bm{\hat{y}}}}
+\newcommand{\dydz}{\frac{\partial \bm{\hat{y}}}{\partial \bm z_3}}
+\newcommand{\dzdz}{\frac{\partial \bm z_2}{\partial \bm z_1}}
+\newcommand{\yh}{\bm{\hat{y}}}
+
+
+\newcommand{\emphasis}[1]{\textcolor{red!80!black}{#1}}
+\newcommand{\shanyin}[1]{\textcolor{blue!80!black}{#1}}
+
+% ****************************
+\begin{document}
+
+
+\title{Deep learning HW1}
+\author{Shanyin Tong, st3255@nyu.edu}
+
+\maketitle
+
+
+\section{Theory}
+\subsection{Two-Layer Neural Nets}
+\subsection{Regression Task}
+\begin{enumerate}[(a)]
+	\item  five steps
+	\item forward pass
+	\begin{table}[tbhp] 
+		{\footnotesize
+			\caption{ forward pass
+			}\label{tab:fw}
+			\begin{center}
+				\renewcommand{\arraystretch}{1.5}
+			\begin{tabular}{|c|c|c|}
+				\hline 
+				 Layer & Input  & Output \\ 
+				\hline 
+				$\linear_1$& $\bm x$ & $\bm W^{(1)} \bm x+\bm b^{(1)}$ \\ 
+				\hline 
+			$f$	&$\bm W^{(1)} \bm x+\bm b^{(1)}$&  $\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+$\\ 
+				\hline 
+				$\linear_2$& $\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+$ & $\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}$ \\ 
+				\hline 
+			$g$	& $\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}$ &  $\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}$\\ 
+				\hline 
+			$\loss$	& $\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}$ & $\|\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}-y\|^2$ \\ 
+				\hline 
+			\end{tabular} 
+			\end{center}
+		}
+	\end{table}
+
+\item downward pass
+	\begin{table}[tbhp] 
+	{\footnotesize
+		\caption{ downward pass
+		}\label{tab:dw}
+		\begin{center}
+			\renewcommand{\arraystretch}{1.8}
+	\begin{tabular}{|c|c|}
+		\hline 
+	Parameter	&  Gradient \\ 
+		\hline 
+	$\bm W^{(1)}$	& $\bm x\dldy\dydz\bm W^{(2)} \frac{\partial \bm z_2}{\partial \bm z_1}$ \\ 
+		\hline 
+		$\bm b^{(1)}$&  $\dldy \dydz\bm W^{(2)} \frac{\partial \bm z_2}{\partial \bm z_1}$\\ 
+		\hline 
+		$\bm W^{(2)}$&  $\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ \dldy\dydz$\\ 
+		\hline 
+		$\bm b^{(2)}$& $\dldy\dydz$ \\ 
+		\hline 
+	\end{tabular} 
+		\end{center}
+	}
+\end{table}
+
+%Note: we can remove $\dydz$ here because $\bm{\hat{y}}=\bm z_3$ since $g$ is identity, so $\frac{\partial l}{\partial \bm z_3}=\dldy$.
+\item For this part and the following text, I will assume $\bm z_2\in \RR^r$ and use notation $z_{j,i}$ to denote the $i$th component of vector $\bm z_j, j=1,2,3.$
+\begin{equation}
+\begin{aligned}
+\left(\dzdz\right)_{ij} =&\frac{\partial f( z_{1,i})}{\partial z_{1,j}} = \frac{\partial ( z_{1,i})^+}{\partial z_{1,j}}
+=\left\lbrace 
+\begin{aligned}
+&0, & &\text{ if } i\neq j \text{ or }   z_{1,i} <0,\\
+& 1, &  &\text{ if } i= j \text{ and }   z_{1,i} \geq 0.
+\end{aligned}
+ \right. 
+\\
+=&\left\lbrace 
+\begin{aligned}
+&0, & &\text{ if } i\neq j \text{ or }   \sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i<0,\\
+& 1, &  &\text{ if } i= j \text{ and }   \sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i \geq 0.
+\end{aligned}
+\right. 
+\end{aligned}
+\end{equation}
+\begin{equation}
+\dzdz =\diag\left\lbrace \mathbbm{1}_{[0,\infty)}\left(\bm z_1 \right)\right\rbrace =\diag\left\lbrace \mathbbm{1}_{[0,\infty)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)\right\rbrace \in \RR^{r\times r},
+\end{equation}
+is a diagonal matrix. Here, $\diag(\cdot)$ builds a diagonal matrix with the input vector as the diagonal elements, $\mathbbm{1}_{[0,\infty)}(\cdot)$ is the element-wise indicator function of $[0,\infty)$, defined as:
+\begin{equation}
+\mathbbm{1}_{[0,\infty)}(x)=\left\lbrace 
+\begin{aligned}
+&1, & &\text{ if } x\geq 0,\\
+& 0, &  &\text{ if } x< 0.
+\end{aligned}
+\right. 
+\end{equation}
+%If we assume $\bm z_2\in \RR^r$, then $\dzdz$ is a $r\times r$-dimensional diagonal matrix.
+
+\begin{equation}
+\begin{aligned}
+\left(\dydz\right)_{ij}= \frac{\partial g( z_{3,i} ) }{\partial  z_{3,j}} = \frac{\partial  z_{3,i}  }{\partial z_{3,j}}
+=\left\lbrace 
+\begin{aligned}
+&1, & &\text{ if } i=j,\\
+& 0, &  &\text{ if } i\neq j.
+\end{aligned}
+\right. 
+\end{aligned}
+\end{equation}
+Thus,
+\begin{equation}
+\dydz = I \in \RR^{K\times K}.
+\end{equation}
+\begin{equation}
+\begin{aligned}
+\left(\dldy\right)_j = &\frac{\partial l_{MSE}(\yh,\bm y)}{\partial \hat{y}_j}= \frac{\partial \|\yh-\bm y\|^2}{\partial \hat{y}_j} = 2(\hat{y}_j - y_j)\\\
+=& 2\left(\sum_{p=1}^{r}W^{(2)}_{jp} \left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)^++b^{(2)}_j- y_j\right) 
+\end{aligned}
+\end{equation}
+Thus, 
+\begin{equation}
+\dldy = 2(\yh -\bm y)^\top =2 \left(\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}-\bm y\right)^\top\in \RR^{1\times K}.
+\end{equation}
+\end{enumerate}
+\newpage
+\subsection{Classification}
+\begin{enumerate}[(a)]
+	\item 	Need to change $f, g$ in the forward pass (b) with logistic sigmoid function $\sigma$, shown as below (I don't use the explicit form of $\sigma$ here because it makes the formula too long)
+	\begin{table}[tbhp] 
+		{\footnotesize
+			\caption{ forward pass, where $\sigma(z)=(1+\exp(-z))^{-1}$ (applied element-wisely)
+			}\label{tab:fw2}
+			\begin{center}
+				\renewcommand{\arraystretch}{1.5}
+				\begin{tabular}{|c|c|c|}
+					\hline 
+					Layer & Input  & Output \\ 
+					\hline 
+					$\linear_1$& $\bm x$ & $\bm W^{(1)} \bm x+\bm b^{(1)}$ \\ 
+					\hline 
+					$f$	&$\bm W^{(1)} \bm x+\bm b^{(1)}$&  $\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)$\\ 
+					\hline 
+					$\linear_2$& $\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)$ & $\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}$ \\ 
+					\hline 
+					$g$	& $\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}$ &  $\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)$\\ 
+					\hline 
+					$\loss$	& $\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)$ & $\|\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)-y\|^2$ \\ 
+					\hline 
+				\end{tabular} 
+			\end{center}
+		}
+	\end{table}
+(c) is the same as before, because the NN architecture does not change. (d) also changes for this problem, 
+\begin{equation}
+\begin{aligned}
+\left(\dzdz\right)_{ij}=&\frac{\partial \sigma(z_{1,i})}{\partial  z_{1,j}} = \frac{\partial (1+\exp(-z_{1,i}))^{-1}}{\partial  z_{1,j}}\\
+= & \left\lbrace 
+\begin{aligned}
+&0, & &\text{ if } i\neq j ,\\
+& \frac{\exp(-z_{1,i}) }{(1+\exp(-z_{1,i}) )^2}, &  &\text{ if } i= j,
+\end{aligned}
+\right.
+\end{aligned}
+\end{equation}
+where $z_{1,i}=\sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i $. Thus,
+\begin{equation}
+\begin{aligned}
+\label{eq:dzdz2}
+\dzdz =&\sigma'(\bm z_1) =\diag\left\lbrace \frac{\exp(-\bm z_1) }{( 1+\exp(-\bm z_1) )^2} \right\rbrace \\
+=& \diag\left\lbrace \frac{\exp(-\bm W^{(1)} \bm x+\bm b^{(1)}) }{(1+\exp(-\bm W^{(1)} \bm x+\bm b^{(1)}) )^2} \right\rbrace \in \RR^{r\times r},
+\end{aligned}
+\end{equation}
+the function $\exp$ and other operations here use element-wise evaluation.
+Similarly,
+\begin{equation}
+\left(\dydz\right)_{ij}=\frac{\partial \sigma(z_{3,i})}{\partial  z_{3,j}} 
+= & \left\lbrace 
+\begin{aligned}
+&0, & &\text{ if } i\neq j ,\\
+& \frac{\exp(-z_{3,i}) }{(1+\exp(-z_{3,i}) )^2}, &  &\text{ if } i= j,
+\end{aligned}
+\right.
+\end{equation}
+where $z_{3,i}=\sum_{p=1}^{r}W^{(2)}_{ip} \sigma\left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)+b^{(2)}_i $.
+Thus,
+\begin{equation}
+\label{eq:dydz2}
+\begin{aligned}
+\dydz =&\sigma'(\bm z_1) =\diag\left\lbrace \frac{\exp(-\bm z_3) }{( 1+\exp(-\bm z_3) )^2} \right\rbrace \\
+=& \diag\left\lbrace \frac{\exp(-\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}) }{(1+\exp(-\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}) )^2} \right\rbrace \in \RR^{K\times K},
+\end{aligned}
+\end{equation}
+Since the loss function does not change, similar to 1.2(d),
+\begin{equation}
+\begin{aligned}
+\left(\dldy\right)_j = 2(\hat{y}_j - y_j)
+= 2\left[\sigma\left(\sum_{p=1}^{r}W^{(2)}_{jp} \sigma\left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)+b^{(2)}_j\right)- y_j\right] 
+\end{aligned}
+\end{equation}
+Thus, 
+\begin{equation}
+\dldy = 2(\yh -\bm y)^\top =2 \left(\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)-\bm y\right)^\top\in \RR^{1\times K}.
+\end{equation}
+\item First of all, beside the changes we obtain from using $\sigma$,  the loss evaluation step of the forward pass (b) changes, because we use different loss function,
+	\begin{table}[tbhp] 
+	{\footnotesize
+		\caption{ forward pass, where $\sigma(z)=(1+\exp(-z))^{-1}$ (applied element-wisely) and $l_{BCE}(\yh, \bm y)=\frac{1}{K}\sum_{i=1}^{K}-[y_i\log(\hat{y}_i)+(1-y_i)\log(1-\hat{y}_i)]$.
+		}\label{tab:fw3}
+		\begin{center}
+			\renewcommand{\arraystretch}{1.5}
+			\begin{tabular}{|c|c|c|}
+				\hline 
+				Layer & Input  & Output \\ 
+				\hline 
+				$\linear_1$& $\bm x$ & $\bm W^{(1)} \bm x+\bm b^{(1)}$ \\ 
+				\hline 
+				$f$	&$\bm W^{(1)} \bm x+\bm b^{(1)}$&  $\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)$\\ 
+				\hline 
+				$\linear_2$& $\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)$ & $\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}$ \\ 
+				\hline 
+				$g$	& $\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}$ &  $\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)$\\ 
+				\hline 
+				$\loss$	& $\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)$ & $l_{BCE}(\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right), \bm y)$ \\ 
+				\hline 
+			\end{tabular} 
+		\end{center}
+	}
+\end{table}
+The backward pass (c) does not change, the elements of $\dzdz$ and $\dydz$ in (d) are the same as we discussed for using $\sigma$ case (see sec 1.3(a) \eqref{eq:dzdz2} and \eqref{eq:dydz2}). The only change is $\dldy$ since $l$ changes.
+\begin{equation}
+\begin{aligned}
+\left(\dldy\right)_j = &\frac{\partial l_{BCE}(\yh,\bm y)}{\partial \hat{y}_j}= \frac{\partial\frac{1}{K}\sum_{i=1}^{K}-[y_i\log(\hat{y}_i)+(1-y_i)\log(1-\hat{y}_i)]}{\partial \hat{y}_j} \\
+=& -\frac{1}{K}\frac{\partial[y_j\log(\hat{y}_j)+(1-y_j)\log(1-\hat{y}_j)]}{\partial \hat{y}_j} = -\frac{1}{K}\left[\frac{y_j}{\hat{y}_j}-\frac{1-y_j}{1-\hat{y}_j}\right]
+\end{aligned}
+\end{equation}
+Thus, 
+\begin{equation}
+\dldy = -\frac{1}{K}\left[ \frac{\bm y}{\yh}-\frac{\bm 1-\bm y}{\bm 1-\yh}\right]^\top\in \RR^{1\times K},
+\end{equation}
+where the operations are done element-wisely.
+\item For sigmoid function $\sigma(z)=(1+\exp(-z))^{-1}$, we know its gradient $\sigma'(z)=\frac{\exp(-z)}{(1+exp(-z))^2}=\frac{1}{2+\exp(z)+\exp(-z)}$ becomes close to 0 when $|z|$ is large
+\end{enumerate}
+\end{document}

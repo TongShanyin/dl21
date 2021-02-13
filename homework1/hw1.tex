@@ -4,7 +4,7 @@
 \usepackage{hyperref}
 \usepackage{comment}
 \usepackage[shortlabels]{enumitem}
-\usepackage{physics,bm}
+\usepackage{bm}
 
 \usepackage{cite,graphicx,color}
 %\usepackage{fourier}
@@ -165,7 +165,7 @@
 &0, & &\text{ if } i\neq j \text{ or }   z_{1,i} <0,\\
 & 1, &  &\text{ if } i= j \text{ and }   z_{1,i} \geq 0.
 \end{aligned}
- \right,
+ \right.,
 %\\
 %=&\left\lbrace 
 %\begin{aligned}
@@ -251,7 +251,30 @@ where $\yh = \bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2
 			\end{center}
 		}
 	\end{table}
-(c) is the same as before, because the NN architecture does not change. (d) also changes for this problem, 
+(c) is the same as before, the only change is from using different $f$, so we use $\sigma(\cdot)$ to replace $(\cdot)^+$ in \cref{tab:dw2}, because the NN architecture does not change. 
+	\begin{table}[tbhp] 
+	{\footnotesize
+		\caption{ downward pass
+		}\label{tab:dw2}
+		\begin{center}
+			\renewcommand{\arraystretch}{1.8}
+			\begin{tabular}{|c|c|}
+				\hline 
+				Parameter	&  Gradient \\ 
+				\hline 
+				$\bm W^{(1)}$	& $\bm x\dldy\dydz\bm W^{(2)} \frac{\partial \bm z_2}{\partial \bm z_1}$ \\ 
+				\hline 
+				$\bm b^{(1)}$&  $\dldy \dydz\bm W^{(2)} \frac{\partial \bm z_2}{\partial \bm z_1}$\\ 
+				\hline 
+				$\bm W^{(2)}$&  $\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) \dldy\dydz$\\ 
+				\hline 
+				$\bm b^{(2)}$& $\dldy\dydz$ \\ 
+				\hline 
+			\end{tabular} 
+		\end{center}
+	}
+\end{table}
+(d) also changes for this problem, 
 \begin{equation}
 \begin{aligned}
 \left(\dzdz\right)_{ij}=&\frac{\partial \sigma(z_{1,i})}{\partial  z_{1,j}} = \frac{\partial (1+\exp(-z_{1,i}))^{-1}}{\partial  z_{1,j}}\\

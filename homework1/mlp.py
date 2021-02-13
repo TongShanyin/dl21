@@ -38,6 +38,7 @@ class MLP:
         # put all the cache value you need in self.cache
         self.cache = dict()
 
+
     def activation(self, z, type):
         """
         Args:
@@ -59,7 +60,6 @@ class MLP:
 
 
 
-
     def forward(self, x):
         """
         Args:
@@ -68,17 +68,21 @@ class MLP:
         Return:
             y_hat: the prediction tensor (batch_size, linear_2_out_features)
         """
-        # TODO: Implement the forward function, cache internal gradients
+        # Implement the forward function, cache internal gradients
+        self.cache['x'] = x
         # linear_1
-        z = torch.mm(x, (self.parameters[W1]).t()) + self.parameters[b1] # tensor (batch_size, linear_1_out_features)
+        z = torch.mm(x, (self.parameters['W1']).t()) + self.parameters['b1'] # tensor (batch_size, linear_1_out_features)
         # f_function
         dzdz = self.activation(z, self.f_function) # z: changes, dzdz: gradient tensor (batch_size, linear_1_out_features)
+        self.cache['dzdz']=dzdz
+        self.cache['z']=z
         # linear_2
-        y_hat = torch.mm(z, (self.parameters[W2]).t()) + self.parameters[b2] # tensor (batch_size, linear_2_out_features)
+        y_hat = torch.mm(z, (self.parameters['W2']).t()) + self.parameters['b2'] # tensor (batch_size, linear_2_out_features)
         # g_function
         dydz = self.activation(y_hat, self.g_function) # y_hat: changes, dydz: gradient tensor (batch_size, linear_1_out_features)
-
+        self.cache['dydz']=dydz
         return y_hat
+
 
     def backward(self, dJdy_hat):
         """
@@ -86,7 +90,19 @@ class MLP:
             dJdy_hat: The gradient tensor of shape (batch_size, linear_2_out_features)
         """
         # TODO: Implement the backward function
-        pass
+        # layer 2
+        dJdz = dJdy_hat*self.cache['dydz']
+        # b2
+        self.grads['dJdb2'] = sum(dJdz)
+        # W2
+        self.grads['dJdW2'] = torch.mm(dJdz.t(), self.cache['z'])
+        # layer 1
+        dJdx= torch.mm(dJdz,self.parameters['W2'])*self.cache['dzdz']
+        # b1
+        self.grads['dJdb1'] = sum(dJdx)
+        # W1
+        self.grads['dJdW1'] = torch.mm(dJdx.t(),self.cache['x'])
+
 
 
     def clear_grad_and_cache(self):

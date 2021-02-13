@@ -165,20 +165,23 @@
 &0, & &\text{ if } i\neq j \text{ or }   z_{1,i} <0,\\
 & 1, &  &\text{ if } i= j \text{ and }   z_{1,i} \geq 0.
 \end{aligned}
- \right. 
-\\
-=&\left\lbrace 
-\begin{aligned}
-&0, & &\text{ if } i\neq j \text{ or }   \sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i<0,\\
-& 1, &  &\text{ if } i= j \text{ and }   \sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i \geq 0.
-\end{aligned}
-\right. 
+ \right,
+%\\
+%=&\left\lbrace 
+%\begin{aligned}
+%&0, & &\text{ if } i\neq j \text{ or }   \sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i<0,\\
+%& 1, &  &\text{ if } i= j \text{ and }   \sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i \geq 0.
+%\end{aligned}
+%\right. 
 \end{aligned}
 \end{equation}
+where $z_{1,i}=\sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i$.
 \begin{equation}
-\dzdz =\diag\left\lbrace \mathbbm{1}_{[0,\infty)}\left(\bm z_1 \right)\right\rbrace =\diag\left\lbrace \mathbbm{1}_{[0,\infty)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)\right\rbrace \in \RR^{r\times r},
+\dzdz =\diag\left\lbrace \mathbbm{1}_{[0,\infty)}\left(\bm z_1 \right)\right\rbrace
+% =\diag\left\lbrace \mathbbm{1}_{[0,\infty)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)\right\rbrace
+ \in \RR^{r\times r},
 \end{equation}
-is a diagonal matrix. Here, $\diag(\cdot)$ builds a diagonal matrix with the input vector as the diagonal elements, $\mathbbm{1}_{[0,\infty)}(\cdot)$ is the element-wise indicator function of $[0,\infty)$, defined as:
+is a diagonal matrix. Here, $\bm z_1=\bm W^{(1)} \bm x+\bm b^{(1)}$, $\diag(\cdot)$ builds a diagonal matrix with the input vector as the diagonal elements, $\mathbbm{1}_{[0,\infty)}(\cdot)$ is the element-wise indicator function of $[0,\infty)$, defined as:
 \begin{equation}
 \mathbbm{1}_{[0,\infty)}(x)=\left\lbrace 
 \begin{aligned}
@@ -206,14 +209,19 @@ Thus,
 \end{equation}
 \begin{equation}
 \begin{aligned}
-\left(\dldy\right)_j = &\frac{\partial l_{MSE}(\yh,\bm y)}{\partial \hat{y}_j}= \frac{\partial \|\yh-\bm y\|^2}{\partial \hat{y}_j} = 2(\hat{y}_j - y_j)\\\
-=& 2\left(\sum_{p=1}^{r}W^{(2)}_{jp} \left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)^++b^{(2)}_j- y_j\right) 
+\left(\dldy\right)_j = \frac{\partial l_{MSE}(\yh,\bm y)}{\partial \hat{y}_j}= \frac{\partial \|\yh-\bm y\|^2}{\partial \hat{y}_j} = 2(\hat{y}_j - y_j),
+%\\
+%=& 2\left(\sum_{p=1}^{r}W^{(2)}_{jp} \left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)^++b^{(2)}_j- y_j\right),
 \end{aligned}
 \end{equation}
+where $\hat{y}_j =\sum_{p=1}^{r}W^{(2)}_{jp} \left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)^++b^{(2)}_j$.
 Thus, 
 \begin{equation}
-\dldy = 2(\yh -\bm y)^\top =2 \left(\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}-\bm y\right)^\top\in \RR^{1\times K}.
+\dldy = 2(\yh -\bm y)^\top 
+%=2 \left(\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}-\bm y\right)^\top
+\in \RR^{1\times K},
 \end{equation}
+where $\yh = \bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}$.
 \end{enumerate}
 %\newpage
 \subsection{Classification}
@@ -259,11 +267,13 @@ where $z_{1,i}=\sum_{j=1}^{n} W^{(1)}_{ij} x_j +b^{(1)}_i $. Thus,
 \begin{equation}
 \begin{aligned}
 \label{eq:dzdz2}
-\dzdz =&\sigma'(\bm z_1) =\diag\left\lbrace \frac{\exp(-\bm z_1) }{( 1+\exp(-\bm z_1) )^2} \right\rbrace \\
-=& \diag\left\lbrace \frac{\exp(-\bm W^{(1)} \bm x+\bm b^{(1)}) }{(1+\exp(-\bm W^{(1)} \bm x+\bm b^{(1)}) )^2} \right\rbrace \in \RR^{r\times r},
+\dzdz =\sigma'(\bm z_1) =\diag\left\lbrace \frac{\exp(-\bm z_1) }{( 1+\exp(-\bm z_1) )^2} \right\rbrace 
+%\\
+%=& \diag\left\lbrace \frac{\exp(-\bm W^{(1)} \bm x+\bm b^{(1)}) }{(1+\exp(-\bm W^{(1)} \bm x+\bm b^{(1)}) )^2} \right\rbrace
+ \in \RR^{r\times r},
 \end{aligned}
 \end{equation}
-the function $\exp$ and other operations here use element-wise evaluation.
+where $\bm z_1 = \bm W^{(1)} \bm x+\bm b^{(1)}$, the function $\exp$ and other operations here use element-wise evaluation.
 Similarly,
 \begin{equation}
 \left(\dydz\right)_{ij}=\frac{\partial \sigma(z_{3,i})}{\partial  z_{3,j}} 
@@ -279,21 +289,30 @@ Thus,
 \begin{equation}
 \label{eq:dydz2}
 \begin{aligned}
-\dydz =&\sigma'(\bm z_1) =\diag\left\lbrace \frac{\exp(-\bm z_3) }{( 1+\exp(-\bm z_3) )^2} \right\rbrace \\
-=& \diag\left\lbrace \frac{\exp(-\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}) }{(1+\exp(-\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}) )^2} \right\rbrace \in \RR^{K\times K},
+\dydz =
+%&
+\sigma'(\bm z_3) =\diag\left\lbrace \frac{\exp(-\bm z_3) }{( 1+\exp(-\bm z_3) )^2} \right\rbrace 
+%\\
+%=& \diag\left\lbrace \frac{\exp(-\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}) }{(1+\exp(-\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}) )^2} \right\rbrace 
+\in \RR^{K\times K},
 \end{aligned}
 \end{equation}
+where $\bm z_3 = \bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}$.
 Since the loss function does not change, similar to 1.2(d),
 \begin{equation}
 \begin{aligned}
-\left(\dldy\right)_j = 2(\hat{y}_j - y_j)
-= 2\left[\sigma\left(\sum_{p=1}^{r}W^{(2)}_{jp} \sigma\left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)+b^{(2)}_j\right)- y_j\right] 
+\left(\dldy\right)_j = 2(\hat{y}_j - y_j),
+%= 2\left[\sigma\left(\sum_{p=1}^{r}W^{(2)}_{jp} \sigma\left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)+b^{(2)}_j\right)- y_j\right] 
 \end{aligned}
 \end{equation}
+where $\hat{y}_j = \sigma\left(\sum_{p=1}^{r}W^{(2)}_{jp} \sigma\left( \sum_{q=1}^nW^{(1)}_{pq}x_q+b^{(1)}_p\right)+b^{(2)}_j\right)$.
 Thus, 
 \begin{equation}
-\dldy = 2(\yh -\bm y)^\top =2 \left(\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)-\bm y\right)^\top\in \RR^{1\times K}.
+\dldy = 2(\yh -\bm y)^\top 
+%=2 \left(\sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)-\bm y\right)^\top
+\in \RR^{1\times K},
 \end{equation}
+where $\yh = \sigma\left(\bm W^{(2)}\sigma\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right) + \bm b^{(2)}\right)$.
 \item First of all, beside the changes we obtain from using $\sigma$,  the loss evaluation step of the forward pass (b) changes, because we use different loss function,
 	\begin{table}[tbhp] 
 	{\footnotesize
@@ -328,7 +347,7 @@ The backward pass (c) does not change, the elements of $\dzdz$ and $\dydz$ in (d
 \end{equation}
 Thus, 
 \begin{equation}
-\dldy = -\frac{1}{K}\left[ \frac{\bm y}{\yh}-\frac{\bm 1-\bm y}{\bm 1-\yh}\right]^\top\in \RR^{1\times K},
+\dldy = -\frac{1}{K}\left[ \frac{\bm y}{\yh}-\frac{ 1-\bm y}{ 1-\yh}\right]^\top\in \RR^{1\times K},
 \end{equation}
 where the operations are done element-wisely.
 \item For sigmoid function $\sigma(z)=(1+\exp(-z))^{-1}$, we know its gradient $\sigma'(z)=\frac{\exp(-z)}{(1+exp(-z))^2}=\frac{1}{2+\exp(z)+\exp(-z)}$ becomes close to 0 when $|z|$ is large, which means the elements of $\dydz$ and $\dzdz$ is quite small. Based on \cref{tab:dw}, this small Jacobian will leads to small gradient with respect to all parameter, especially for $\bm W^{(1)}$ and $\bm b^{(1)}$ (first few layers), because they have both $\dydz$ and $\dzdz$ inside. So the parameter $\bm W^{(1)}$ and $\bm b^{(1)}$ will not change/be update much through training, which is a waste of the layer. Thus, to make full use of the layer, the activation function $f(z)=(z)^+$ is better, because its gradient is 1 for all positive $z$,  so the elements of $\dzdz$ are $O(1)$, thus this activation function provides enough updates for the parameter in the first few layers, which helps train the neural network.

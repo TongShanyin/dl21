@@ -53,9 +53,13 @@
 \def\<{\left\langle} \def\>{\right\rangle}
 
 
-\DeclareRobustCommand{\linear}{\operatorname*{Linear}}
-\DeclareRobustCommand{\loss}{\operatorname*{Loss}}
-\DeclareRobustCommand{\diag}{\operatorname*{diag}}
+%\DeclareRobustCommand{\linear}{\operatorname*{Linear}}
+%\DeclareRobustCommand{\loss}{\operatorname*{Loss}}
+%\DeclareRobustCommand{\diag}{\operatorname*{diag}}
+
+\newcommand{\linear}{\text{Linear}}
+\newcommand{\loss}{\text{Loss}}
+\newcommand{\diag}{\text{diag}}
 
 \newcommand{\dldy}{\frac{\partial l}{\partial \bm{\hat{y}}}}
 \newcommand{\dydz}{\frac{\partial \bm{\hat{y}}}{\partial \bm z_3}}
@@ -81,7 +85,27 @@
 \subsection{Regression Task}
 \begin{enumerate}[(a)]
 	\item  five steps
-	\item forward pass
+	\begin{enumerate}[1)]
+		\item Build the model to represent the architecture of the neural network in \texttt{Pytorch}:
+		\begin{equation}
+		\linear_1\rightarrow f \rightarrow \linear_2\rightarrow g.
+		\end{equation}
+		\item Feed forward to get outputs/predictions: for input $\bm x$, obtain output $\yh$ through forward pass of the neural network (like composition of functions)
+		\begin{equation}
+		\yh = g(\linear_2(f(\linear_1(\bm x) )  )).
+		\end{equation}
+		\item Evaluate the loss function: using data $\bm y$ and prediction from forward pass $\yh$:
+		\begin{equation}
+		l_{MSE}(\yh, \bm y)=\|\yh -\bm y\|^2.
+		\end{equation}
+		\item Backward pass to compute gradient: first initiate the gradient by 0, and then back propagate and accumulate the derivative information at each layer to evaluate the gradient of loss function $l$ with respect to neural network parameter (denoted by $\frac{\partial l}{\partial w}$) using the chain rule.
+		\item Update the parameter $w$ using the gradient obtained in step 4:
+		\begin{equation}
+		w = w - \eta\frac{\partial l}{\partial w},
+		\end{equation}
+		where $\eta$ is the step size.
+	\end{enumerate}
+	\item forward pass in \cref{tab:fw}
 	\begin{table}[tbhp] 
 		{\footnotesize
 			\caption{ forward pass
@@ -107,7 +131,7 @@
 		}
 	\end{table}
 
-\item downward pass
+\item downward pass in \cref{tab:dw}
 	\begin{table}[tbhp] 
 	{\footnotesize
 		\caption{ downward pass
@@ -191,7 +215,7 @@ Thus,
 \dldy = 2(\yh -\bm y)^\top =2 \left(\bm W^{(2)}\left(\bm W^{(1)} \bm x+\bm b^{(1)}\right)^+ + \bm b^{(2)}-\bm y\right)^\top\in \RR^{1\times K}.
 \end{equation}
 \end{enumerate}
-\newpage
+%\newpage
 \subsection{Classification}
 \begin{enumerate}[(a)]
 	\item 	Need to change $f, g$ in the forward pass (b) with logistic sigmoid function $\sigma$, shown as below (I don't use the explicit form of $\sigma$ here because it makes the formula too long)
@@ -243,7 +267,7 @@ the function $\exp$ and other operations here use element-wise evaluation.
 Similarly,
 \begin{equation}
 \left(\dydz\right)_{ij}=\frac{\partial \sigma(z_{3,i})}{\partial  z_{3,j}} 
-= & \left\lbrace 
+= \left\lbrace 
 \begin{aligned}
 &0, & &\text{ if } i\neq j ,\\
 & \frac{\exp(-z_{3,i}) }{(1+\exp(-z_{3,i}) )^2}, &  &\text{ if } i= j,
@@ -307,6 +331,6 @@ Thus,
 \dldy = -\frac{1}{K}\left[ \frac{\bm y}{\yh}-\frac{\bm 1-\bm y}{\bm 1-\yh}\right]^\top\in \RR^{1\times K},
 \end{equation}
 where the operations are done element-wisely.
-\item For sigmoid function $\sigma(z)=(1+\exp(-z))^{-1}$, we know its gradient $\sigma'(z)=\frac{\exp(-z)}{(1+exp(-z))^2}=\frac{1}{2+\exp(z)+\exp(-z)}$ becomes close to 0 when $|z|$ is large
+\item For sigmoid function $\sigma(z)=(1+\exp(-z))^{-1}$, we know its gradient $\sigma'(z)=\frac{\exp(-z)}{(1+exp(-z))^2}=\frac{1}{2+\exp(z)+\exp(-z)}$ becomes close to 0 when $|z|$ is large, which means the elements of $\dydz$ and $\dzdz$ is quite small. Based on \cref{tab:dw}, this small Jacobian will leads to small gradient with respect to all parameter, especially for $\bm W^{(1)}$ and $\bm b^{(1)}$ (first few layers), because they have both $\dydz$ and $\dzdz$ inside. So the parameter $\bm W^{(1)}$ and $\bm b^{(1)}$ will not change/be update much through training, which is a waste of the layer. Thus, to make full use of the layer, the activation function $f(z)=(z)^+$ is better, because its gradient is 1 for all positive $z$,  so the elements of $\dzdz$ are $O(1)$, thus this activation function provides enough updates for the parameter in the first few layers, which helps train the neural network.
 \end{enumerate}
 \end{document}

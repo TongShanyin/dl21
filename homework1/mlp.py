@@ -45,6 +45,7 @@ class MLP:
             z: tensor shape (batch_size, linear_out_features)
             type: string: relu | sigmoid | identity
         Return:
+            z: tensor shape (batch_size, linear_out_features)
             dzdz: element-wisely gradient tensor (batch_size, linear_out_features)
         """
         if type == 'relu': # ReLU fct and its gradient
@@ -52,11 +53,12 @@ class MLP:
             dzdz[z>=0] = 1
             z[z<0]=0
         elif type == 'sigmoid': # sigmoid fct and its gradient
-            dzdz = torch.exp(-z) / (1 + torch.exp(-z)).pow(2)
+            # dzdz = torch.exp(-z) / (1 + torch.exp(-z)).pow(2)
+            dzdz = 1 / (2 + torch.exp(-z) + torch.exp(z))
             z = 1 / (1 + torch.exp(-z))
         else: # identity fct and its gradient
             dzdz = torch.ones(z.size())
-        return dzdz
+        return z, dzdz
 
 
 
@@ -73,13 +75,13 @@ class MLP:
         # linear_1
         z = torch.mm(x, (self.parameters['W1']).t()) + self.parameters['b1'] # tensor (batch_size, linear_1_out_features)
         # f_function
-        dzdz = self.activation(z, self.f_function) # z: changes, dzdz: gradient tensor (batch_size, linear_1_out_features)
+        z, dzdz = self.activation(z, self.f_function) # z: changes, dzdz: gradient tensor (batch_size, linear_1_out_features)
         self.cache['dzdz']=dzdz
         self.cache['z']=z
         # linear_2
         y_hat = torch.mm(z, (self.parameters['W2']).t()) + self.parameters['b2'] # tensor (batch_size, linear_2_out_features)
         # g_function
-        dydz = self.activation(y_hat, self.g_function) # y_hat: changes, dydz: gradient tensor (batch_size, linear_1_out_features)
+        y_hat, dydz = self.activation(y_hat, self.g_function) # y_hat: changes, dydz: gradient tensor (batch_size, linear_1_out_features)
         self.cache['dydz']=dydz
         return y_hat
 

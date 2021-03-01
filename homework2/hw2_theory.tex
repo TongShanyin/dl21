@@ -98,36 +98,36 @@
 	\item \begin{enumerate}[(i)] 
 		\item Since filter is 1, there is 1 output channel. For input dimension 5, kernel size 3 and stride 2 with no padding or dilation, the output dimension $n_W$ satisfies $2(n_W-1)+3\leq 5$, thus $n_W=2$. 
 		
-		So the output $f_W(x)\in\RR^{1\times 2}$. The element of $f_W(x)$ is 
+		So the output $f_W(x)\in\RR^{2\times 1}$. The element of $f_W(x)$ is 
 		\begin{equation}
-		f_W(x)[i,j] = \sum_{k=1}^{3} W[i,:,k] x[2j-2+k]=\sum_{k=1}^{3} \sum_{l=1}^2W[i,l,k] x[l,2j-2+k],\;i=1,\; j=1,2.
+		f_W(x)[j,i] = \sum_{k=1}^{3} W[i,:,k] \cdot x[2j-2+k]=\sum_{k=1}^{3} \sum_{l=1}^2W[i,l,k] x[2j-2+k,l],\;i=1,\; j=1,2.
 		\end{equation}
-		Here, I consider $x[n]$ as column vector and $W[i,:,k]$ is a row vector.
+	
 		
 		
 		\item Here, I use the same notations for matrix gradients as in the book "Mathematics for Machine Learning", and same for the following answers.
 		
-		Since $W\in\RR^{1\times 2\times 3}$ and $f_W(x)\in\RR^{1\times 2}$,
+		Since $W\in\RR^{1\times 2\times 3}$ and $f_W(x)\in\RR^{2\times 1}$,
 		\begin{equation}
-		\frac{\partial f_W(x)}{\partial W}\in \RR^{(1\times 2)\times (1\times 2\times 3)},
+		\frac{\partial f_W(x)}{\partial W}\in \RR^{(2\times 1)\times (1\times 2\times 3)},
 		\end{equation}
 		its element is 
 		\begin{equation}
 		\begin{aligned}
-		\frac{\partial f_W(x)}{\partial W}[i,j,k,l,m]=\frac{f_W(x)[i,j]}{\partial W[k,l,m]}
+		\frac{\partial f_W(x)}{\partial W}[j,i,k,l,m]=\frac{f_W(x)[j,i]}{\partial W[k,l,m]}
 =  x[l,2j-2+m],\\
 		 i=1,\; j=1,2,\; k=1,\; l=1,2,\;m=1,2,3.
 		\end{aligned}
 		\end{equation}
 		
-		\item Since $f_W(x)\in\RR^{1\times 2}$ and $x\in\RR^{2\times 5}$, 
+		\item Since $f_W(x)\in\RR^{2\times 1}$ and $x\in\RR^{5\times 2}$, 
 		\begin{equation}
-		\frac{\partial f_W(x)}{\partial x}\in\RR^{(1\times 2) \times (2\times 5) },
+		\frac{\partial f_W(x)}{\partial x}\in\RR^{(2\times 1) \times (5\times 2) },
 		\end{equation}
 		its element is 
 		\begin{equation*}
 		\begin{aligned}
-		\frac{\partial f_W(x)}{\partial x}[i,j,k,l]=\frac{\partial f_W(x)[i,j]}{\partial x[k,l]}=\left\lbrace 
+		\frac{\partial f_W(x)}{\partial x}[j,i,l,k]=\frac{\partial f_W(x)[j,i]}{\partial x[l,k]}=\left\lbrace 
 		\begin{aligned}
 	&	W[i,k,l+2-2j], & \text{ if } l+2-2j\in\{1,2,3\},\\
 	&	0, & \text{ else,}
@@ -136,7 +136,7 @@
 		\end{aligned}
 		\end{equation*}
 		
-		\item Different from what we uses in homework 1 (numerator-layout). To keep the homework 2 consistent, I use the denominator-layout notation$\frac{\partial l}{\partial f_W(x)}\in \RR^{1\times 2}$ and $\frac{\partial l}{\partial f_W(x)}[i,j]=\frac{\partial l}{\partial f_W(x)[i,j]}$ Thus, 
+		\item Different from what we uses in homework 1 (numerator-layout). To keep the homework 2 consistent, I use the denominator-layout notation$\frac{\partial l}{\partial f_W(x)}\in \RR^{2\times 1}$ and $\frac{\partial l}{\partial f_W(x)}[i,j]=\frac{\partial l}{\partial f_W(x)[i,j]}$ Thus, 
 		\begin{equation}
 		\frac{\partial l}{\partial W}\in \RR^{1\times 2 \times 3},
 		\end{equation}
@@ -144,14 +144,14 @@
 		\begin{equation}
 		\begin{aligned}
 		\frac{\partial l}{\partial W}[i,j,k]=&\frac{\partial l}{\partial W[i,j,k]}
-		= \sum_{q=1}^2\frac{\partial l}{\partial f_W(x)[1,q]}\frac{\partial f_W(x)[1,q]}{\partial W[i,j,k]}\\
-		=&\sum_{q=1}^2\frac{\partial l}{\partial f_W(x)[1,q]} x[j,2q-2+k]\\
-		= &\frac{\partial l}{\partial f_W(x)[1,1]} x[j,k]+\frac{\partial l}{\partial f_W(x)[1,2]} x[j,2+k], \\
+		= \sum_{q=1}^2\frac{\partial l}{\partial f_W(x)[q,1]}\frac{\partial f_W(x)[q,1]}{\partial W[i,j,k]}\\
+		=&\sum_{q=1}^2\frac{\partial l}{\partial f_W(x)[q,1]} x[j,2q-2+k]\\
+		= &\frac{\partial l}{\partial f_W(x)[1,1]} x[j,k]+\frac{\partial l}{\partial f_W(x)[2,1]} x[j,2+k], \\
 		&i=1,\; j=1,2,\; k=1,2,3.
 		\end{aligned}
 		\end{equation}
 		
-		The expression in (i) is the forward pass for convolutional neural network, while in (iv) the formula is its backward pass. The similarity for both pass is they all have locality/sparsity, i.e., they all require some of the input data $x[n]$, but not the full $x$ for one neuron computation. The difference is for forward pass, it requires three neighboring input samples $x[n]$ to compute one output $f_W(x)[:,j]$, while the downward pass require input sample $x[n]$ with the corresponding stride, i.e. $x[1]$ and $x[3]$ for $\frac{\partial l}{\partial W}[i,j,1]$, $x[2]$ and $x[4]$ for $\frac{\partial l}{\partial W}[i,j,2]$, $x[3]$ and $x[5]$ for $\frac{\partial l}{\partial W}[i,j,3]$. The other similarity is stationarity, i.e. the pass share the some parameter for different neurons. The output for forward pass $f_W[i,1]$ and $f_W[i,2]$ share the same weight $W$, while the gradient for downward pass $\frac{\partial l}{\partial W}[i,j,1], \frac{\partial l}{\partial W}[i,j,2], \frac{\partial l}{\partial W}[i,j,3]$ share the gradient $\frac{\partial l}{\partial f_W(x)}$ and $x$.
+		The expression in (i) is the forward pass for convolutional neural network, while in (iv) the formula is its backward pass. The similarity for both pass is they all have locality/sparsity, i.e., they all require some of the input data $x[n]$, but not the full $x$ for one neuron computation. The difference is for forward pass, it requires three neighboring input samples $x[n]$ to compute one output $f_W(x)[j,:]$, while the downward pass require input sample $x[n]$ with the corresponding stride, i.e. $x[1]$ and $x[3]$ for $\frac{\partial l}{\partial W}[i,j,1]$, $x[2]$ and $x[4]$ for $\frac{\partial l}{\partial W}[i,j,2]$, $x[3]$ and $x[5]$ for $\frac{\partial l}{\partial W}[i,j,3]$. The other similarity is stationarity, i.e. the pass share the some parameter for different neurons. The output for forward pass $f_W[i,1]$ and $f_W[i,2]$ share the same weight $W$, while the gradient for downward pass $\frac{\partial l}{\partial W}[i,j,1], \frac{\partial l}{\partial W}[i,j,2], \frac{\partial l}{\partial W}[i,j,3]$ share the gradient $\frac{\partial l}{\partial f_W(x)}$ and $x$.
 	\end{enumerate}
 \end{enumerate}
 \newpage
@@ -195,7 +195,7 @@
 		\end{axis}
 		\end{tikzpicture}
 	\end{figure}
-	\item Since $c(t)$ and $z(t)$ are in the same size, the dimension of $c(t)$ is $c(t)\in \RR^m$.
+	\item Since $c[t]$ and $z[t]$ are in the same size, the dimension of $c[t]$ is $c[t]\in \RR^m$.
 	
 	\item Use the denominator-layout notation, since $W_x \in \RR^{m\times n}$, thus $\frac{\partial l}{\partial W_x}\in \RR^{m\times n}$, its element is
 	\begin{equation}\label{eq:dldW}

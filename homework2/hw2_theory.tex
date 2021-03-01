@@ -151,8 +151,81 @@
 		\end{aligned}
 		\end{equation}
 		
-		The expression in (i) is the forward pass for convolutional neural network, while in (iv) the formula is its backward pass. The similarity for both pass is they all have locality/sparsity, i.e., they all require some of the input data $x[n]$, but not the full $x$ for one component computation. The difference is for forward pass, it requires three neighboring input samples $x[n]$ to compute one output $f_W(x)[:,j]$, while the downward pass require input sample $x[n]$ with the corresponding stride, i.e. $x[1]$ and $x[3]$ for $\frac{\partial l}{\partial W}[i,j,1]$, $x[2]$ and $x[4]$ for $\frac{\partial l}{\partial W}[i,j,2]$, $x[3]$ and $x[5]$ for $\frac{\partial l}{\partial W}[i,j,3]$. The other similarity is stationarity, i.e. the pass share the some parameter for different nodes. The output for forward pass $f_W[i,1]$ and $f_W[i,2]$ share the same weight $W$, while the gradient for downward pass $\frac{\partial l}{\partial W}[i,j,1], \frac{\partial l}{\partial W}[i,j,2], \frac{\partial l}{\partial W}[i,j,3]$ share the gradient $\frac{\partial l}{\partial f_W(x)}$ and $x$.
+		The expression in (i) is the forward pass for convolutional neural network, while in (iv) the formula is its backward pass. The similarity for both pass is they all have locality/sparsity, i.e., they all require some of the input data $x[n]$, but not the full $x$ for one neuron computation. The difference is for forward pass, it requires three neighboring input samples $x[n]$ to compute one output $f_W(x)[:,j]$, while the downward pass require input sample $x[n]$ with the corresponding stride, i.e. $x[1]$ and $x[3]$ for $\frac{\partial l}{\partial W}[i,j,1]$, $x[2]$ and $x[4]$ for $\frac{\partial l}{\partial W}[i,j,2]$, $x[3]$ and $x[5]$ for $\frac{\partial l}{\partial W}[i,j,3]$. The other similarity is stationarity, i.e. the pass share the some parameter for different neurons. The output for forward pass $f_W[i,1]$ and $f_W[i,2]$ share the same weight $W$, while the gradient for downward pass $\frac{\partial l}{\partial W}[i,j,1], \frac{\partial l}{\partial W}[i,j,2], \frac{\partial l}{\partial W}[i,j,3]$ share the gradient $\frac{\partial l}{\partial f_W(x)}$ and $x$.
 	\end{enumerate}
 \end{enumerate}
-
+\newpage
+\subsection{Recurrent Neural Networks}
+\begin{enumerate}[(a)]
+	\item  The diagram for this recurrent neural network is 
+	\begin{figure}[tbhp]\centering
+		\begin{tikzpicture}[scale = 1.5]
+		\begin{axis}[compat=1.11, width=12cm, height=8cm,
+		xmin=-5,
+		xmax=5,
+		ymin=-3,
+		ymax=3,
+		axis line style={draw=none},
+		tick style={draw=none},
+		yticklabels={,,},
+		xticklabels={,,},
+		]
+		\node at (-4.3,2) {$z[t-1]$};
+		\draw[->, thick](-3.8,2) -- (-2.3,2);
+		\filldraw [red!30] (-2,2) circle (.3) node[black]{\large $\odot$};		
+		\draw[thick](-3.5,2) -- (-3.5,0);
+		\draw[thick,->](-3.5,0) --(-3.2,0);
+		\filldraw [blue!30] (-2.9,0) circle (.3) node[black]{\large $+$};
+		\filldraw [brown!30] (-2,0) circle (.4) node[black]{\large $\sigma$};
+		\draw[thick,->](-2.6,0) --(-2.4,0);	
+		\draw[thick,->] (-2,0.4) -- (-2,1.7) node[midway,sloped, below]{$c[t]$};
+		\draw[thick,->](-1.6,0) --(-1,0);		
+		\filldraw [yellow!30] (-0.6,0) circle (.4) node[black]{\large $1-$};		
+			\draw[thick,->](-0.2,0) --(0.5,0);		
+			\filldraw [red!30] (0.8,0) circle (.3) node[black]{\large $\odot$};		
+			\draw[->, thick](-1.7,2) -- (0.5,2);
+			\filldraw [blue!30] (0.8,2) circle (.3) node[black]{\large $+$};
+		\draw[->,thick] (-2.9, -1.5) -- (-2.9,-0.3);
+		\node at (-4.3,-1.5) {$x[t]$};
+		\draw[thick](-3.8,-1.5) -- (0.8,-1.5);
+		\draw[->,thick] (0.8, -1.5) -- (0.8, -0.3);
+		\draw[->,thick] (0.8, 0.3) -- (0.8, 1.7);
+		\draw[->,thick] (1.1, 2) -- (2, 2);
+		\node at (2.5,2) {$z[t]$};
+		\end{axis}
+		\end{tikzpicture}
+	\end{figure}
+	\item Since $c(t)$ and $z(t)$ are in the same size, the dimension of $c(t)$ is $c(t)\in \RR^m$.
+	
+	\item Use the denominator-layout notation, since $W_x \in \RR^{m\times n}$, thus $\frac{\partial l}{\partial W_x}\in \RR^{m\times n}$, its element is
+	\begin{equation}\label{eq:dldW}
+	\begin{aligned}
+	\frac{\partial l}{\partial W_x}[i,j] =&\frac{\partial l}{\partial W_x[i,j]}\\
+ =&\sum_{t=1}^{K} \sum_{p=1}^m \frac{\partial l}{\partial z[t][p]}\frac{\partial z[t][p]}{\partial W_x[i,j]}\\
+ =& \sum_{t=1}^{K}  \frac{\partial l}{\partial z[t][i]} \frac{\partial z[t][i]}{\partial W_x[i,j]}\\
+ =&\frac{\partial l}{\partial z[1][i]}(1-c[1][i])x[1][j]+\sum_{t=2}^{K}  \frac{\partial l}{\partial z[t][i]} \left[ c[t][i]\frac{\partial z[t-1][i]}{\partial W_x[i,j]} + (1-c[t][i])x[t][j]\right] \\
+ =&  \sum_{t=1}^{K} \frac{\partial l}{\partial z[t][i]}  \sum_{s=1}^{t}  x[s][j](1-c[s][i])
+ \prod_{r\leq t, r>s} c[r][i], \\
+ & i=1,\dots, m, \; j=1,\ldots, n.
+	\end{aligned}
+	\end{equation}
+	Note when $s\geq t$, we use $ \prod_{r\leq t, r>s} c[r][i]=1$.
+	
+	The forward pass and backward pass in this RNN all use $c[t]$ to control if use the information from the input $x[t]$ at time $t$. If $c[t][i]=1$, then in the forward pass, the output $z[t][i]$ do not use input data $x[t]$ but use the memory $z[t-1]$. While in the downward pass, $\frac{\partial l}{\partial W_x}[i,:]$ is zero, meaning it also do not use the input info $x[t]$. When $c[t][i]=0$, it means in the forward pass we use the previous data $x[s], s\leq t$ to compute the output $z[t]$, so we may accumulate $x[s]$ in our output, so the corresponding gradient from the downward pass will also accumulate the influence.
+	
+	\item This RNN can help prevent vanishing or exploding gradients. Assume $x[t]$ and $\frac{\partial l}{\partial z[t]}$ are nonzero element-wisely.  According to \eqref{eq:dldW}, the gradient 
+	\begin{equation}
+	\frac{\partial l}{\partial W_x}[i,j]=\sum_{t=1}^{K} \frac{\partial l}{\partial z[t][i]}  \sum_{s=1}^{t}  x[s][j] A(i,t,s) 
+	,
+	\end{equation}
+	 the coefficient $A(i,t,s)$ is
+	\begin{equation}\label{eq:coef}
+A(i,t, s):=	(1-c[s][i])
+	\prod_{r\leq t, r>s} c[r][i] \in \{0, 1\}, \; s\leq t,
+	\end{equation}
+	
+	If $c[p][i]=0$, then $A(i,t,s)=0, s<p\leq t$; if $c[p][i]=1$, then $A(i,t,p)=0$, so either case for $c[p][i]$, there are several coefficient $A(i,t,s)$'s are zeros, so this prevent the exploding for gradient.
+	
+	Let $k=\text{argmax}\{r: c[r][i] = 0\}$, if $k$ exists, then $A(i,t ,k)$ is nonzero for $t\geq k$. If $k$ does not exit, this means we do not use any input $x[t]$, which is a rare case. For the other cases, we always have some $A(i,t ,k)$'s are nonzero. This prevents vanishing gradients.
+\end{enumerate}
 \end{document}

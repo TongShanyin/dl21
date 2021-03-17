@@ -1,0 +1,90 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[centertags]{amsmath}
+\usepackage{amsfonts,amssymb, amsthm}
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage[shortlabels]{enumitem}
+\usepackage{bm}
+
+\usepackage{cite,graphicx,color}
+%\usepackage{fourier}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{bbm}
+
+\usepackage{tikz,pgfplots}
+
+\usepackage{mathtools}
+%\mathtoolsset{showonlyrefs} % only show no. of refered eqs
+
+\usepackage{cleveref}
+
+\textheight 8.5in
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+
+\newtheoremstyle{dotlessP}{}{}{\color{blue!50!black}}{}{\color{blue}\bfseries}{}{ }{}
+\theoremstyle{dotlessP}
+\newtheorem{question}{Question}
+
+
+
+\def\VV{\mathbb{V}}
+\def\EE{\mathbb{E}}
+\def\PP{\mathbb{P}}
+\def\RR{\mathbb{R}}
+\newcommand{\mD}{\mathcal{D}}
+\newcommand{\mF}{F}%{\mathcal{F}}
+
+\DeclareMathOperator{\sgn}{sgn}
+%\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\erfc}{erfc}
+\DeclareRobustCommand{\argmin}{\operatorname*{argmin}}
+\DeclareRobustCommand{\arginf}{\operatorname*{arginf}}
+
+\def\EE{\mathbb{E}}\def\PP{\mathbb{P}}
+\def\NN{\mathbb{N}}\def\RR{\mathbb{R}}\def\ZZ{\mathbb{Z}}
+
+
+
+\def\<{\left\langle} \def\>{\right\rangle}
+
+
+%\DeclareRobustCommand{\linear}{\operatorname*{Linear}}
+%\DeclareRobustCommand{\loss}{\operatorname*{Loss}}
+%\DeclareRobustCommand{\diag}{\operatorname*{diag}}
+
+\newcommand{\linear}{\text{Linear}}
+\newcommand{\loss}{\text{Loss}}
+\newcommand{\diag}{\text{diag}}
+
+
+
+
+\newcommand{\emphasis}[1]{\textcolor{red!80!black}{#1}}
+\newcommand{\shanyin}[1]{\textcolor{blue!80!black}{#1}}
+
+% ****************************
+\begin{document}
+
+
+\title{Deep learning HW3}
+\author{Shanyin Tong, st3255@nyu.edu}
+
+\maketitle
+
+\section{Theory}
+
+\subsection{Energy Based Models Intuition}
+\begin{enumerate}[(a)]
+	\item Energy based model build/train energy function that has lower value at the good points $y_i$'s but has higher value at the bad points, i.e., other $\hat{y}_i$'s. In a word, for the energy function, $F_W$, $F_W(x_i, y_i)$ is small, while $F_W(x_i, \hat{y}_i)$ is large, i.e., push down on the energy of training samples and pull up on the energy for the other points.
+	\item Probabilistic models are a special case of EBM. Energies are like unnormalized negative log probabilities. However, EBM gives more flexibility in the choice of the scoring function, and more flexibility in the choice of objective function for learning.
+	\item \begin{equation}
+	p(y|x) =\frac{\exp(-\beta F(x,y))}{\int_{y'}\exp(-\beta F(x,y'))}, \; \beta >0.
+	\end{equation}
+\end{enumerate}
+
+\end{document}

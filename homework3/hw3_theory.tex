@@ -94,7 +94,7 @@
 		\item Regularized latent variable methods: regularize the volume of the low energy regions, i.e., add regularization term on the latent variable to limit the information capacity of the latent representation.
 	\end{enumerate}
 \item $$l_{example}(x,y, \hat{y},W) = [F_W(x,y)-F_W(x,\hat{y}) +m ]^{+},$$
-where $(x,\hat{y})$ are negative examples and $m>0$ is the margin. If $F_W(x,\hat{y}) - F_W(x,y) < m$, then to minimize $l_{example}(x,y, \hat{y},W)$, we need to push the difference of $F_W(x,\hat{y}) - F_W(x,y)$ becoming larger, which either push down $F_W(x,y)$ or push up $F_W(x,\hat{y}$.
+where $(x,\hat{y})$ are negative examples and $m>0$ is the margin. If $F_W(x,\hat{y}) - F_W(x,y) < m$, then to minimize $l_{example}(x,y, \hat{y},W)$, we need to push the difference of $F_W(x,\hat{y}) - F_W(x,y)$ becoming larger, which either push down $F_W(x,y)$ or push up $F_W(x,\hat{y})$.
 \end{enumerate}
 
 \subsection{Negative log-likelihood loss}
@@ -149,5 +149,49 @@ where $(x,\hat{y})$ are negative examples and $m>0$ is the margin. If $F_W(x,\ha
 
 
 \subsection{Comparing contrastive loss functions}
+\begin{enumerate}[(a)]
+	\item 
+	\begin{equation}
+	\frac{\partial l_\text{simple} (x,y, \bar{y}, W)   }{\partial W}=\left\lbrace 
+	\begin{aligned}
+	&\frac{\partial F_W(x, y)}{\partial W} -\frac{\partial F_W(x, \bar{y})}{\partial W},  && \text{ if } F_W(x,y) \geq 0 \text{ and } F_W(x, \bar{y}) \leq m,\\
+	&	\frac{\partial F_W(x, y)}{\partial W},  && \text{ if } F_W(x,y) \geq 0 \text{ and } F_W(x, \bar{y}) > m,\\
+	&	-\frac{\partial F_W(x, \bar{y})}{\partial W},  && \text{ if } F_W(x,y) < 0 \text{ and } F_W(x, \bar{y}) \leq m,\\
+	&	0,  && \text{ if } F_W(x,y) < 0 \text{ and } F_W(x, \bar{y}) > m.\\
+	\end{aligned}\right. 
+	\end{equation}
+	
+	\item 
+	\begin{equation}
+	\frac{\partial l_\text{hinge} (x,y, \bar{y}, W)   }{\partial W}=\left\lbrace 
+	\begin{aligned}
+& \frac{\partial F_W(x, y)}{\partial W} -\frac{\partial F_W(x, \bar{y})}{\partial W}, &&  \text{ if } F_W(x, \bar{y}) -F_W(x, y) \leq m, \\
+& 0, && \text{ if } F_W(x, \bar{y}) -F_W(x, y) > m.
+	\end{aligned}
+	\right. 
+	\end{equation}
+	
+	\item 
+	\begin{equation}
+	\frac{\partial l_\text{square-square} (x,y, \bar{y}, W)   }{\partial W}=
+	2[F_W(x,y)]^+ \frac{\partial F_W(x, y)}{\partial W} - 2[m-F_W(x,\bar{y})]^+ \frac{\partial F_W(x, \bar{y})}{\partial W}.
+	\end{equation}
+	
+	\item 
+	\begin{enumerate}[(i)]
+		\item The NLL loss result in sharp edges in energy space, push down the energy at data points $(x,y)$ until reaching negative infinity and push up the energy at contrastive points $(x, \bar{y})$ until reaching the positive infinity. While the three losses above only want to make the energy difference between $(x,y)$ and $(x, \bar{y})$ to be larger than the margin $m$ (hinge loss) or separated by 0 and margin $m$ (simple and square-square loss). When the energy $F_W(x,y)$ and $F_W(x, \bar{y})$ is separated by the margin $m$, i.e., $F_W(x,\bar{y})-F_W(x,y) >m$ for hinge loss, $F_W(x,\bar{y})>m$ and $F_W(x,y) <0$ for simple and square-square loss, the model stops pushing $F_W(x,\bar{y})$ up or $F_W(x,{y})$ down.
+		
+		\item The margin $m$ in hinge loss is the distance we want to make between the energy $F_W(x,\bar{y})$ and $F_W(x,
+		{y})$, minimizing the hinge loss makes $F_W(x,y)$ lower that $F_W(x,\bar{y})$ by margin $m$. The reason we only take positive part of $F_W(x,y) -F_W(x, \bar{y})+m$ is when  $F_W(x,y) -F_W(x, \bar{y})+m$ is negative, the difference $F_W(x,\bar{y})-F_W(x,y)$ is already larger than $m$, so we don't need to push the energy thus the gradient $\frac{\partial l_\text{hinge} (x,y, \bar{y}, W)   }{\partial W}= 0$. But if $F_W(x,\bar{y})-F_W(x,y) < m$, we need to push up $F_W(x,\bar{y})$ and push down $F_W(x,y)$, and the decent direction (negative gradient)$-\frac{\partial l_\text{hinge} (x,y, \bar{y}, W)   }{\partial W}= -\frac{\partial F_W(x, y)}{\partial W} +\frac{\partial F_W(x, \bar{y})}{\partial W}$ shows by updating in this direction, we can 
+		push up $F_W(x,\bar{y})$ and push down $F_W(x,y)$ in order to make their difference larger than $m$.
+		
+		\item The simple loss and square-square loss consider the energy values of $F_W(x,\bar{y})$ and $F_W(x,y)$, and separate them by making the $F_W(x,y) <0$ and $F_W(x,\bar{y})>m$, while hinge loss only cares about the difference, i.e., making $F_W(x,\bar{y})-F_W(x,y) >m$.
+		
+		When I want a positive/nonnegative energy function, I would choose the square-square loss, since when $F_W(x,y)>0$ but very close to 0, the model update to push the energy down is very small ($2[F_W(x,y)]^+ \frac{\partial F_W(x, y)}{\partial W} $ depends on the value of $F_W(x,y)$, smaller positive $F_W(x,y)$ brings smaller update).
+		When I don't require positive energy function, I can use simple loss. The other difference is that square-square loss is smoother, it is differentiable wrt $F_W(x,y)$ and  $F_W(x,\bar{y})$.
+	\end{enumerate}
+	
+	
+\end{enumerate}
 
 \end{document}

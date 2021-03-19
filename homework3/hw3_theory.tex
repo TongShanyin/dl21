@@ -83,8 +83,71 @@
 	\item Energy based model build/train energy function that has lower value at the good points $y_i$'s but has higher value at the bad points, i.e., other $\hat{y}_i$'s. In a word, for the energy function, $F_W$, $F_W(x_i, y_i)$ is small, while $F_W(x_i, \hat{y}_i)$ is large, i.e., push down on the energy of training samples and pull up on the energy for the other points.
 	\item Probabilistic models are a special case of EBM. Energies are like unnormalized negative log probabilities. However, EBM gives more flexibility in the choice of the scoring function, and more flexibility in the choice of objective function for learning.
 	\item \begin{equation}
-	p(y|x) =\frac{\exp(-\beta F(x,y))}{\int_{y'}\exp(-\beta F(x,y'))}, \; \beta >0.
+	p(y|x) =\frac{\exp(-\beta F_W(x,y))}{\int_{y'}\exp(-\beta F_W(x,y'))}, \; \beta >0.
 	\end{equation}
+	\item Energy function is an implicit function that captures the dependency between training data, i.e., $x$ and $y$. Loss function is used for training/learning the energy function, which we want to minimize. When minimizing the loss, EBM pushes down the energy of the data points and pulls up everywhere else.
+	\item Yes, loss function can equal to the energy function.
+	\item Because the model don't know where to pull up the energy because only positive data are given. So to pull down the energy for the correct inputs, one naive way the model might do is to reduce energy for the whole field, i.e., a degenerate solution.
+	\item \begin{enumerate}[(1)]
+		\item Contrastive methods: choose contrastive points where the energy should be pushed up, and push down the energy at the data points.
+		\item Architectural methods: build the machine so that the volume of the low energy regions is bounded, i.e., limiting the latent space. For example, in K-means, the latent space is discrete.
+		\item Regularized latent variable methods: regularize the volume of the low energy regions, i.e., add regularization term on the latent variable to limit the information capacity of the latent representation.
+	\end{enumerate}
+\item $$l_{example}(x,y, \hat{y},W) = [F_W(x,y)-F_W(x,\hat{y}) +m ]^{+},$$
+where $(x,\hat{y})$ are negative examples and $m>0$ is the margin. If $F_W(x,\hat{y}) - F_W(x,y) < m$, then to minimize $l_{example}(x,y, \hat{y},W)$, we need to push the difference of $F_W(x,\hat{y}) - F_W(x,y)$ becoming larger, which either push down $F_W(x,y)$ or push up $F_W(x,\hat{y}$.
 \end{enumerate}
+
+\subsection{Negative log-likelihood loss}
+\begin{enumerate}[(i)]
+	\item \begin{equation}\label{eq:likelihood}
+	p_W(y|x) 
+%	=\frac{\exp(-\beta F_W(x,y))}{\int_{y'}\exp(-\beta F_W(x,y'))}
+	=\frac{\exp(-\beta F_W(x,y))}{\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))}, \; y\in\{1,\ldots,n\}, \; \beta>0.
+	\end{equation}
+	
+	\item The negative log-likehood loss is from taking the logarithm of \eqref{eq:likelihood} and multiply with -1,
+	\begin{equation}
+	\begin{aligned}
+	-\log p_W(y|x) & =- \log \frac{\exp(-\beta F_W(x,y))}{\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))} \\
+	& = -[\log \exp(-\beta F_W(x,y)) - \log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))]\\
+	& = -(-\beta F_W(x,y)) -[- \log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))]\\
+	& = \beta F_W(x,y) + \log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) .
+	\end{aligned}
+	\end{equation}
+	
+	Multiply the loss with $\frac{1}{\beta}$, we obtain:
+	\begin{equation}\label{eq:loss}
+	l(x,y, W) = F_W(x,y) + \frac{1}{\beta}\log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) .
+	\end{equation}
+	
+	\item The gradient of \eqref{eq:loss} wrt $W$ is:
+	\begin{equation}\label{eq:dldW}
+	\begin{aligned}
+	\frac{\partial l(x,y, W)}{\partial W} & = \frac{\partial}{\partial W}[F_W(x,y) + \frac{1}{\beta}\log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) ]\\
+	& = \frac{\partial F_W(x,y)}{\partial W} + \frac{1}{\beta}  \frac{\partial}{\partial W} \log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) \\
+	& = \frac{\partial F_W(x,y)}{\partial W} + \frac{1}{\beta} \frac{\frac{\partial}{\partial W}\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))  }{\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))  }\\
+	& = \frac{\partial F_W(x,y)}{\partial W} + \frac{1}{\beta} \frac{ \sum\limits_{k=1}^{n} \frac{\partial \exp(-\beta F_W(x,k))}{\partial W} }{\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))  }\\
+	& = \frac{\partial F_W(x,y)}{\partial W} + \frac{1}{\beta} \frac{ \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) (-\beta \frac{\partial F_W(x,k)}{\partial W}) }{\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))  }\\
+	& = \frac{\partial F_W(x,y)}{\partial W} - \sum\limits_{y'=1}^{n} \frac{\exp(-\beta F_W(x,y'))}{\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k))  } \frac{\partial F_W(x,y')}{\partial W}\\
+	& = \frac{\partial F_W(x,y)}{\partial W} -  \sum\limits_{y'=1}^{n}  p_W(y'|x) \frac{\partial F_W(x,y')}{\partial W},
+	\end{aligned}
+	\end{equation}
+	where the last quality use \eqref{eq:likelihood}.
+	
+	The gradient in \eqref{eq:dldW} requires compute likelihood $p_W(y'|x)$ and $\frac{\partial F_W(x,y')}{\partial W}$ for all $y'\in {1,\ldots,n}$ which includes computation of $\exp(-\beta F_W(x,y')) $  for all $y'\in {1,\ldots,n}$. When $n$ is large, this computation is very costly, thus intractable. To overcome it, we can use sampling method (like MCMC, which does not require knowing the normalization constant $\sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) $) to draw a sample $\hat{y}$ from $p_W(y|x)$ and use it to evaluate the second term in the last equality of \eqref{eq:dldW}, i.e, 
+	\begin{equation}
+\frac{\partial l(x,y, W)}{\partial W} = \frac{\partial F_W(x,y)}{\partial W} - \frac{\partial F_W(x,\hat{y})}{\partial W}, \; \text{where } \hat{y}\text{ is a sample from } p_W(y|x).
+	\end{equation}
+	
+	\item From \eqref{eq:loss}, we know to minimize the loss $l$, we need to make the part $F_W(x,y)$ small as well as the part $ \frac{1}{\beta}\log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) $. To make the part $ \frac{1}{\beta}\log \sum\limits_{k=1}^{n}\exp(-\beta F_W(x,k)) $ small, we need to make $F_W(x,k)$ as large as possible. To achieve this, the loss is minimized when $F_W(x,y)$ to $-\infty$ and $F_W(x,k)$ to $\infty$. This can be also seen in the gradient descent, assume the step length $\eta>0$, the update of parameter $W$ is 
+	\begin{equation}
+	W \leftarrow W - \eta \frac{\partial F_W(x,y)}{\partial W} + \eta  \sum\limits_{y'=1}^{n}  p_W(y'|x) \frac{\partial F_W(x,y')}{\partial W},
+	\end{equation}
+	the part $- \eta \frac{\partial F_W(x,y)}{\partial W}$ will push down the energy at samples $(x,y)$, while $F_W(x, k)$ is low energy, the weights $p_W(y'|x)$ is larger, so the term $+ \eta  \sum\limits_{y'=1}^{n}  p_W(y'|x) \frac{\partial F_W(x,y')}{\partial W}$ will pull up the energy at these points $(x,y')$, and will continue doing so as long as $\frac{\partial F_W(x,y)}{\partial W} \neq 0$ and $\frac{F_W(x,y')}{\partial W} \neq 0$, i.e., $F_W(x,y)$ do not decrease, i.e., $-\infty$ and $F_W(x,y')$ do not increase, i.e., $\infty$, as long as $y'\neq y$. So this will resulting an energy space with sharp edges in continuous region, since every $y'\neq y$ will have positive infinite energy but at $y$ is negative infinite.
+	
+\end{enumerate}
+
+
+\subsection{Comparing contrastive loss functions}
 
 \end{document}

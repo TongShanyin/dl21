@@ -115,7 +115,7 @@
 		\begin{equation}
 		\begin{aligned}
 		\frac{\partial f_W(x)}{\partial W}[j,i,k,l,m]=\frac{f_W(x)[j,i]}{\partial W[k,l,m]}
-=  x[l,2j-2+m],\\
+=  x[2j-2+m,l],\\
 		 i=1,\; j=1,2,\; k=1,\; l=1,2,\;m=1,2,3.
 		\end{aligned}
 		\end{equation}
@@ -136,7 +136,9 @@
 		\end{aligned}
 		\end{equation*}
 		
-		\item Different from what we uses in homework 1 (numerator-layout). To keep the homework 2 consistent, I use the denominator-layout notation$\frac{\partial l}{\partial f_W(x)}\in \RR^{2\times 1}$ and $\frac{\partial l}{\partial f_W(x)}[i,j]=\frac{\partial l}{\partial f_W(x)[i,j]}$ Thus, 
+		\item 
+%		Different from what we uses in homework 1 (numerator-layout). To keep the homework 2 consistent, I use the denominator-layout notation$\frac{\partial l}{\partial f_W(x)}\in \RR^{2\times 1}$ and $\frac{\partial l}{\partial f_W(x)}[i,j]=\frac{\partial l}{\partial f_W(x)[i,j]}$ 
+		Use the notation in "Mathematics for Machine Learning", the tensor $\frac{\partial l}{\partial W}\in \RR^{1\times(1\times 2 \times 3)}$. If we omit the first dimension, then we can say (similar to denominator layout)
 		\begin{equation}
 		\frac{\partial l}{\partial W}\in \RR^{1\times 2 \times 3},
 		\end{equation}
@@ -197,10 +199,10 @@
 	\end{figure}
 	\item Since $c[t]$ and $z[t]$ are in the same size, the dimension of $c[t]$ is $c[t]\in \RR^m$.
 	
-	\item Use the denominator-layout notation, since $W_x \in \RR^{m\times n}$, thus $\frac{\partial l}{\partial W_x}\in \RR^{m\times n}$, its element is
+	\item Use the numerator-layout notation, since $W_x \in \RR^{m\times n}$, thus $\frac{\partial l}{\partial W_x}\in \RR^{n\times m}$, its element is
 	\begin{equation}\label{eq:dldW}
 	\begin{aligned}
-	\frac{\partial l}{\partial W_x}[i,j] =&\frac{\partial l}{\partial W_x[i,j]}\\
+	\frac{\partial l}{\partial W_x}[j,i] =&\frac{\partial l}{\partial W_x[i,j]}\\
  =&\sum_{t=1}^{K} \sum_{p=1}^m \frac{\partial l}{\partial z[t][p]}\frac{\partial z[t][p]}{\partial W_x[i,j]}\\
  =& \sum_{t=1}^{K}  \frac{\partial l}{\partial z[t][i]} \frac{\partial z[t][i]}{\partial W_x[i,j]}\\
  =&\frac{\partial l}{\partial z[1][i]}(1-c[1][i])x[1][j]+\sum_{t=2}^{K}  \frac{\partial l}{\partial z[t][i]} \left[ c[t][i]\frac{\partial z[t-1][i]}{\partial W_x[i,j]} + (1-c[t][i])x[t][j]\right] \\
@@ -211,11 +213,11 @@
 	\end{equation}
 	Note when $s\geq t$, we use $ \prod_{r\leq t, r>s} c[r][i]=1$.
 	
-	The forward pass and backward pass in this RNN all use $c[t]$ to control if use the information from the input $x[t]$ at time $t$. If $c[t][i]=1$, then in the forward pass, the output $z[t][i]$ do not use input data $x[t]$ but use the memory $z[t-1]$. While in the downward pass, $\frac{\partial l}{\partial W_x}[i,:]$ is zero, meaning it also do not use the input info $x[t]$. When $c[t][i]=0$, it means in the forward pass we use the previous data $x[s], s\leq t$ to compute the output $z[t]$, so we may accumulate $x[s]$ in our output, so the corresponding gradient from the downward pass will also accumulate the influence.
+	The forward pass and backward pass in this RNN all use $c[t]$ to control if use the information from the input $x[t]$ at time $t$. If $c[t][i]=1$, then in the forward pass, the output $z[t][i]$ do not use input data $x[t]$ but use the memory $z[t-1]$. While in the downward pass, $\frac{\partial l}{\partial W_x}[:,i]$ is zero, meaning it also do not use the input info $x[t]$. When $c[t][i]=0$, it means in the forward pass we use the previous data $x[s], s\leq t$ to compute the output $z[t]$, so we may accumulate $x[s]$ in our output, so the corresponding gradient from the downward pass will also accumulate the influence.
 	
 	\item This RNN can help prevent vanishing or exploding gradients. Assume $x[t]$ and $\frac{\partial l}{\partial z[t]}$ are nonzero element-wisely.  According to \eqref{eq:dldW}, the gradient 
 	\begin{equation}
-	\frac{\partial l}{\partial W_x}[i,j]=\sum_{t=1}^{K} \frac{\partial l}{\partial z[t][i]}  \sum_{s=1}^{t}  x[s][j] A(i,t,s) 
+	\frac{\partial l}{\partial W_x}[j,i]=\sum_{t=1}^{K} \frac{\partial l}{\partial z[t][i]}  \sum_{s=1}^{t}  x[s][j] A(i,t,s) 
 	,
 	\end{equation}
 	 the coefficient $A(i,t,s)$ is
